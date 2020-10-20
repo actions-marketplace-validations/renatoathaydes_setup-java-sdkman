@@ -1,26 +1,16 @@
-name: 'Setup Java JDK'
-description: 'Set up a specific version of the Java JDK and add the
+name: 'Setup Java JDK with SDKMAN!'
+description: 'Set up a specific Java JDK using SDKMAN! and add the
    command-line tools to the PATH'
-author: 'GitHub'
+author: 'Renato Athaydes'
 inputs:
   java-version:
-    description: 'The Java version to make available on the path. Takes a whole
-       or semver Java version, or 1.x syntax (e.g. 1.8 => Java 8.x).
-       Early access versions can be specified in the form of e.g. 14-ea,
-       14.0.0-ea, or 14.0.0-ea.28'
+    description: 'The Java version to make available on the path. Must match a SDKMAN! 
+      JDK identifier (e.g. java 15.0.0.fx-zulu).'
     required: true
-  java-package:
-    description: 'The package type (jre, jdk, jdk+fx)'
-    required: false
-    default: 'jdk'
   architecture:
     description: 'The architecture (x86, x64) of the package.'
     required: false
     default: 'x64'
-  jdkFile:
-    description: 'Path to where the compressed JDK is located. The path could
-       be in your source repository or a local path on the agent.'
-    required: false
   server-id:
     description: 'ID of the distributionManagement repository in the pom.xml
        file. Default is `github`'

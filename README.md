@@ -1,4 +1,4 @@
-# setup-java
+# setup-java-sdkman
 
 <p align="left">
   <a href="https://github.com/actions/setup-java"><img alt="GitHub Actions status" src="https://github.com/actions/setup-java/workflows/Main%20workflow/badge.svg"></a>

@@ -17,12 +17,7 @@ async function run() {
       throw new Error(`architecture "${arch}" is not in [x86 | x64]`);
     }
 
-    const javaPackage = core.getInput(constants.INPUT_JAVA_PACKAGE, {
-      required: true
-    });
-    const jdkFile = core.getInput(constants.INPUT_JDK_FILE, {required: false});
-
-    await installer.getJava(version, arch, jdkFile, javaPackage);
+    await installer.getJava(version, arch);
 
     const matchersPath = path.join(__dirname, '..', '..', '.github');
     core.info(`##[add-matcher]${path.join(matchersPath, 'java.json')}`);
