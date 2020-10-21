@@ -8054,7 +8054,7 @@ function execSdkMan(args) {
         yield getSdkMan();
         yield exec.exec(shell, [
             '-c',
-            `source ${userHome}/.sdkman/bin/sdkman-init.sh && ${args}`
+            `source ${userHome}/.sdkman/bin/sdkman-init.sh && sdk ${args}`
         ]);
     });
 }

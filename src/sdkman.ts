@@ -24,6 +24,6 @@ export async function execSdkMan(args: string): Promise<void> {
   await getSdkMan();
   await exec.exec(shell, [
     '-c',
-    `source ${userHome}/.sdkman/bin/sdkman-init.sh && ${args}`
+    `source ${userHome}/.sdkman/bin/sdkman-init.sh && sdk ${args}`
   ]);
 }
