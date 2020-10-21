@@ -5,7 +5,7 @@ author: 'Renato Athaydes'
 inputs:
   java-version:
     description: 'The Java version to make available on the path. Must match a SDKMAN! 
-      JDK identifier (e.g. java 15.0.0.fx-zulu).'
+      JDK identifier (e.g. 15.0.0.fx-zulu).'
     required: true
   architecture:
     description: 'The architecture (x86, x64) of the package.'
