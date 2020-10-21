@@ -41,48 +41,7 @@ jobs:
         java-version: 8.0.265-zulu
     - name: Verify Java 8
       if: runner.os != 'windows'
-      run: __tests__/verify-java.sh 1.8.0_265 "${{ steps.setup-java-sdkman.outputs.path }}" "${{ steps.setup-java-sdkman.outputs.version }}"
+      run: __tests__/verify-java.sh "openjdk version \"1.8.0_265\"" "${{ steps.setup-java-sdkman.outputs.path }}" "${{ steps.setup-java-sdkman.outputs.version }}"
     - name: Verify Java 8 (Windows)
       if: runner.os == 'windows'
-      run: __tests__/verify-java.ps1 1.8.0_265 "${{ steps.setup-java-sdkman.outputs.path }}" "${{ steps.setup-java-sdkman.outputs.version }}"
-
-  test-proxy:
-    runs-on: ubuntu-latest
-    container:
-      image: ubuntu:latest
-      options: --dns 127.0.0.1
-    services:
-      squid-proxy:
-        image: datadog/squid:latest
-        ports:
-          - 3128:3128
-    env:
-      https_proxy: http://squid-proxy:3128
-    steps:
-    - uses: actions/checkout@v2
-    - name: Clear tool cache
-      run: rm -rf $RUNNER_TOOL_CACHE/*
-    - name: Setup Java 11 OpenJDK
-      id: setup-java-sdkman
-      uses: ./
-      with:
-        java-version: 11.0.2-open
-    - name: Verify Java 11 OpenJDK
-      run: __tests__/verify-java.sh 11.0.2 "${{ steps.setup-java-sdkman.outputs.path }}" "${{ steps.setup-java-sdkman.outputs.version }}"
-
-  test-bypass-proxy:
-    runs-on: ubuntu-latest
-    env:
-      https_proxy: http://no-such-proxy:3128
-      no_proxy: github.com,static.azul.com
-    steps:
-    - uses: actions/checkout@v2
-    - name: Clear tool cache
-      run: rm -rf $RUNNER_TOOL_CACHE/*
-    - name: Setup Java 11 OpenJDK
-      id: setup-java-sdkman
-      uses: ./
-      with:
-        java-version: 11.0.2-open
-    - name: Verify Java 11 OpenJDK
-      run: __tests__/verify-java.sh 11.0.2 "${{ steps.setup-java-sdkman.outputs.path }}" "${{ steps.setup-java-sdkman.outputs.version }}"
+      run: __tests__/verify-java.ps1 "openjdk version \"1.8.0_265\"" "${{ steps.setup-java-sdkman.outputs.path }}" "${{ steps.setup-java-sdkman.outputs.version }}"

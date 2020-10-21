@@ -8052,10 +8052,13 @@ exports.getSdkMan = getSdkMan;
 function execSdkMan(args) {
     return __awaiter(this, void 0, void 0, function* () {
         yield getSdkMan();
-        yield exec.exec(shell, [
+        let code = yield exec.exec(shell, [
             '-c',
             `source ${userHome}/.sdkman/bin/sdkman-init.sh && sdk ${args}`
         ]);
+        if (code !== 0) {
+            throw `sdk ERROR: command 'sdk ${args}' exited with code ${code}`;
+        }
     });
 }
 exports.execSdkMan = execSdkMan;

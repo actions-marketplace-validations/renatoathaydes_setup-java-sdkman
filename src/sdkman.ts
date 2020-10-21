@@ -22,8 +22,11 @@ export async function getSdkMan(): Promise<void> {
 
 export async function execSdkMan(args: string): Promise<void> {
   await getSdkMan();
-  await exec.exec(shell, [
+  let code = await exec.exec(shell, [
     '-c',
     `source ${userHome}/.sdkman/bin/sdkman-init.sh && sdk ${args}`
   ]);
+  if (code !== 0) {
+    throw `sdk ERROR: command 'sdk ${args}' exited with code ${code}`;
+  }
 }
