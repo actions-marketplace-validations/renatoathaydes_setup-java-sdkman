@@ -78,17 +78,4 @@ describe('installer tests', () => {
     return;
   });
 
-  it('Doesnt use version of Java that was only partially installed in cache', async () => {
-    const JavaDir: string = path.join(toolDir, 'java-250', '1.0.0', 'x64');
-    await io.mkdirP(JavaDir);
-    let thrown = false;
-    try {
-      // This will throw if it doesn't find it in the cache (because no such version exists)
-      await installer.getJava('250', 'x64');
-    } catch {
-      thrown = true;
-    }
-    expect(thrown).toBe(true);
-    return;
-  });
 });
