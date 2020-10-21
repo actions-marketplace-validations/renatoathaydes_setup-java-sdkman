@@ -8032,7 +8032,7 @@ const exec = __importStar(__webpack_require__(986));
 const tc = __importStar(__webpack_require__(533));
 const sdkmanUrl = 'https://get.sdkman.io';
 const userHome = process.env.HOME;
-const shell = process.env.SHELL;
+const shell = (process.env.SHELL || 'bash');
 function getSdkMan() {
     return __awaiter(this, void 0, void 0, function* () {
         let toolPath = tc.find('sdkman', '1');
@@ -8042,7 +8042,7 @@ function getSdkMan() {
         else {
             core.debug('Installing SDKMAN!');
             const sdkmanInstaller = yield tc.downloadTool(sdkmanUrl);
-            yield exec.exec('bash', [sdkmanInstaller]);
+            yield exec.exec(shell, [sdkmanInstaller]);
             yield tc.cacheDir(`${userHome}/.sdkman`, 'sdkman', '1.0.0');
             core.info('Installed SDKMAN!');
         }
