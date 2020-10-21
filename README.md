@@ -1,12 +1,13 @@
 # setup-java-sdkman
 
 <p align="left">
-  <a href="https://github.com/actions/setup-java"><img alt="GitHub Actions status" src="https://github.com/actions/setup-java/workflows/Main%20workflow/badge.svg"></a>
+  <a href="https://github.com/renatoathaydes/setup-java-sdkman"><img alt="GitHub Actions status" src="https://github.com/renatoathaydes/setup-java-sdkman/workflows/Main%20workflow/badge.svg"></a>
 </p>
 
 This action sets up a java environment for use in actions by:
 
-- optionally downloading and caching a requested version of java by version and adding to PATH. Default downloads are populated from the [Zulu Community distribution of OpenJDK](http://static.azul.com/zulu/bin/)
+- Downloading and caching a requested version of java by its SDKMAN! version and adding to PATH.
+  See [SDKMAN!](http://sdkman.io/jdks) for available JDK versions.
 - registering problem matchers for error output
 
 # Usage
@@ -14,77 +15,38 @@ This action sets up a java environment for use in actions by:
 See [action.yml](action.yml)
 
 ## Basic
+
 ```yaml
 steps:
 - uses: actions/checkout@v2
-- uses: actions/setup-java@v1
+- uses: renatoathaydes/setup-java-sdkman@v1
   with:
-    java-version: '9.0.4' # The JDK version to make available on the path.
-    java-package: jdk # (jre, jdk, or jdk+fx) - defaults to jdk
+    java-version: '11.0.2-open' # The SDKMAN! JDK version to use.
     architecture: x64 # (x64 or x86) - defaults to x64
-- run: java -cp java HelloWorldApp
-```
-Examples of version specifications that the java-version parameter will accept:
-
-- A major Java version
-
-  e.g. ```6, 7, 8, 9, 10, 11, 12, 13, ...```
-
-- A semver Java version specification
-
-  e.g. ```8.0.232, 7.0.181, 11.0.4```
-
-  e.g. ```8.0.x, >11.0.3, >=13.0.1, <8.0.212```
-
-- An early access (EA) Java version
-
-  e.g. ```14-ea, 15-ea```
-
-  e.g. ```14.0.0-ea, 15.0.0-ea```
-
-  e.g. ```14.0.0-ea.28, 15.0.0-ea.2``` (syntax for specifying an EA build number)
-
-  Note that, per semver rules, EA builds will be matched by explicit EA version specifications.
-
-- 1.x syntax
-
-    e.g. ```1.8``` (same as ```8```)
-
-    e.g. ```1.8.0.212``` (same as ```8.0.212```)
-
-
-## Local file
-```yaml
-steps:
-- uses: actions/checkout@v2
-- uses: actions/setup-java@v1
-  with:
-    java-version: '4.0.0'
-    architecture: x64
-    jdkFile: <path to jdkFile> # Optional - jdkFile to install java from. Useful for versions not found on Zulu Community CDN
 - run: java -cp java HelloWorldApp
 ```
 
 ## Matrix Testing
+
 ```yaml
 jobs:
   build:
     runs-on: ubuntu-16.04
     strategy:
       matrix:
-        # test against latest update of each major Java version, as well as specific updates of LTS versions:
-        java: [ 1.6, 6.0.83, 7, 7.0.181, 8, 8.0.192, 9.0.x, 10, 11.0.x, 11.0.3, 12, 13 ]
+        java: [ "8.0.265-zulu", "11.0.2-open" ]
     name: Java ${{ matrix.java }} sample
     steps:
       - uses: actions/checkout@v2
       - name: Setup java
-        uses: actions/setup-java@v1
+        uses: renatoathaydes/setup-java-sdkman@v1
         with:
           java-version: ${{ matrix.java }}
       - run: java -cp java HelloWorldApp
 ```
 
 ## Publishing using Apache Maven
+
 ```yaml
 jobs:
   build:
@@ -94,9 +56,9 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Set up JDK 1.8
-      uses: actions/setup-java@v1
+      uses: renatoathaydes/setup-java-sdkman@v1
       with:
-        java-version: 1.8
+        java-version: "8.0.265-zulu"
 
     - name: Build with Maven
       run: mvn -B package --file pom.xml
@@ -107,9 +69,9 @@ jobs:
         GITHUB_TOKEN: ${{ github.token }} # GITHUB_TOKEN is the default env for the password
 
     - name: Set up Apache Maven Central
-      uses: actions/setup-java@v1
+      uses: renatoathaydes/setup-java-sdkman@v1
       with: # running setup-java again overwrites the settings.xml
-        java-version: 1.8
+        java-version: 8.0.265-zulu
         server-id: maven # Value of the distributionManagement/repository/id field of the pom.xml
         server-username: MAVEN_USERNAME # env variable for username in deploy
         server-password: MAVEN_CENTRAL_TOKEN # env variable for token in deploy
@@ -146,6 +108,7 @@ The two `settings.xml` files created from the above example look like the follow
 ```
 
 `settings.xml` file created for the second deploy to Apache Maven Central
+
 ```xml
 <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -171,6 +134,7 @@ If `gpg-private-key` input is provided, the private key will be written to a fil
 See the help docs on [Publishing a Package](https://help.github.com/en/github/managing-packages-with-github-packages/configuring-apache-maven-for-use-with-github-packages#publishing-a-package) for more information on the `pom.xml` file.
 
 ## Publishing using Gradle
+
 ```yaml
 jobs:
 
@@ -181,7 +145,9 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Set up JDK 1.8
-      uses: actions/setup-java@v1
+      uses: renatoathaydes/setup-java-sdkman@v1
+      with:
+        java-version: "8.0.265-zulu"
 
     - name: Build with Gradle
       run: gradle build
@@ -210,9 +176,9 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Set up JDK 1.8 for Shared Runner
-      uses: actions/setup-java@v1
+      uses: renatoathaydes/setup-java-sdkman@v1
       with:
-        java-version: 1.8
+        java-version: "8.0.265-zulu"
         server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
         settings-path: ${{ github.workspace }} # location for the settings.xml file
 
