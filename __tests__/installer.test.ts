@@ -74,10 +74,7 @@ describe('installer tests', () => {
     await io.mkdirP(JavaDir);
     fs.writeFileSync(`${JavaDir}.complete`, 'hello');
     // This will throw if it doesn't find it in the cache (because no such version exists)
-    await installer.getJava(
-      '250',
-      'x64'
-    );
+    await installer.getJava('250', 'x64');
     return;
   });
 

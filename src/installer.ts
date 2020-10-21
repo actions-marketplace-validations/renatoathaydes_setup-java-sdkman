@@ -5,10 +5,7 @@ import * as sdk from './sdkman';
 
 const userHome = process.env.HOME as string;
 
-export async function getJava(
-  version: string,
-  arch: string
-): Promise<void> {
+export async function getJava(version: string, arch: string): Promise<void> {
   // the version is not semver and includes a vendor,
   // so we do not use the version parameter and consider
   // the version part of the name of the tool
@@ -20,12 +17,7 @@ export async function getJava(
     await sdk.execSdkMan('install java ' + version);
     const jdkDir = userHome + '/.sdkman/candidates/java/' + version;
     core.debug(`jdk extracted to ${jdkDir}`);
-    toolPath = await tc.cacheDir(
-      jdkDir,
-      'java-' + version,
-      '1.0.0',
-      arch
-    );
+    toolPath = await tc.cacheDir(jdkDir, 'java-' + version, '1.0.0', arch);
   }
 
   let extendedJavaHome = 'JAVA_HOME_' + version + '_' + arch;

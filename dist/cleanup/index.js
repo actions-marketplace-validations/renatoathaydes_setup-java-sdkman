@@ -1019,8 +1019,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.INPUT_VERSION = 'version';
 exports.INPUT_JAVA_VERSION = 'java-version';
 exports.INPUT_ARCHITECTURE = 'architecture';
-exports.INPUT_JAVA_PACKAGE = 'java-package';
-exports.INPUT_JDK_FILE = 'jdkFile';
 exports.INPUT_SERVER_ID = 'server-id';
 exports.INPUT_SERVER_USERNAME = 'server-username';
 exports.INPUT_SERVER_PASSWORD = 'server-password';

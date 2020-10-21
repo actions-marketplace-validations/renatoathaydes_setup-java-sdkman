@@ -8005,6 +8005,64 @@ util_1.applyMixin(ElementImpl_1.ElementImpl, SlotableImpl_1.SlotableImpl);
 
 /***/ }),
 
+/***/ 121:
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const core = __importStar(__webpack_require__(470));
+const exec = __importStar(__webpack_require__(986));
+const tc = __importStar(__webpack_require__(533));
+const sdkmanUrl = 'https://get.sdkman.io';
+const userHome = process.env.HOME;
+const shell = process.env.SHELL;
+function getSdkMan() {
+    return __awaiter(this, void 0, void 0, function* () {
+        let toolPath = tc.find('sdkman', '1');
+        if (toolPath) {
+            core.debug(`SDKMAN! found in cache ${toolPath}`);
+        }
+        else {
+            core.debug('Installing SDKMAN!');
+            const sdkmanInstaller = yield tc.downloadTool(sdkmanUrl);
+            yield exec.exec('bash', [sdkmanInstaller]);
+            yield tc.cacheDir(`${userHome}/.sdkman`, 'sdkman', '1.0.0');
+            core.info('Installed SDKMAN!');
+        }
+    });
+}
+exports.getSdkMan = getSdkMan;
+function execSdkMan(args) {
+    return __awaiter(this, void 0, void 0, function* () {
+        yield getSdkMan();
+        yield exec.exec(shell, [
+            '-c',
+            `source ${userHome}/.sdkman/bin/sdkman-init.sh && ${args}`
+        ]);
+    });
+}
+exports.execSdkMan = execSdkMan;
+
+
+/***/ }),
+
 /***/ 129:
 /***/ (function(module) {
 
@@ -25756,8 +25814,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.INPUT_VERSION = 'version';
 exports.INPUT_JAVA_VERSION = 'java-version';
 exports.INPUT_ARCHITECTURE = 'architecture';
-exports.INPUT_JAVA_PACKAGE = 'java-package';
-exports.INPUT_JDK_FILE = 'jdkFile';
 exports.INPUT_SERVER_ID = 'server-id';
 exports.INPUT_SERVER_USERNAME = 'server-username';
 exports.INPUT_SERVER_PASSWORD = 'server-password';
@@ -28787,11 +28843,7 @@ function run() {
             if (!['x86', 'x64'].includes(arch)) {
                 throw new Error(`architecture "${arch}" is not in [x86 | x64]`);
             }
-            const javaPackage = core.getInput(constants.INPUT_JAVA_PACKAGE, {
-                required: true
-            });
-            const jdkFile = core.getInput(constants.INPUT_JDK_FILE, { required: false });
-            yield installer.getJava(version, arch, jdkFile, javaPackage);
+            yield installer.getJava(version, arch);
             const matchersPath = path.join(__dirname, '..', '..', '.github');
             core.info(`##[add-matcher]${path.join(matchersPath, 'java.json')}`);
             const id = core.getInput(constants.INPUT_SERVER_ID, { required: false });
@@ -33485,59 +33537,24 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(__webpack_require__(470));
-const io = __importStar(__webpack_require__(1));
-const exec = __importStar(__webpack_require__(986));
-const httpm = __importStar(__webpack_require__(539));
 const tc = __importStar(__webpack_require__(533));
-const fs = __importStar(__webpack_require__(747));
 const path = __importStar(__webpack_require__(622));
-const semver = __importStar(__webpack_require__(280));
-const util = __importStar(__webpack_require__(322));
-const tempDirectory = util.getTempDir();
-const IS_WINDOWS = util.isWindows();
-function getJava(version, arch, jdkFile, javaPackage) {
+const sdk = __importStar(__webpack_require__(121));
+const userHome = process.env.HOME;
+function getJava(version, arch) {
     return __awaiter(this, void 0, void 0, function* () {
-        let toolPath = tc.find(javaPackage, version);
+        // the version is not semver and includes a vendor,
+        // so we do not use the version parameter and consider
+        // the version part of the name of the tool
+        let toolPath = tc.find('java-' + version, '1', arch);
         if (toolPath) {
-            core.debug(`Tool found in cache ${toolPath}`);
+            core.debug(`Java version found in cache ${toolPath}`);
         }
         else {
-            let compressedFileExtension = '';
-            if (!jdkFile) {
-                core.debug('Downloading JDK from Azul');
-                const http = new httpm.HttpClient('setup-java', undefined, {
-                    allowRetries: true,
-                    maxRetries: 3
-                });
-                const url = 'https://static.azul.com/zulu/bin/';
-                const response = yield http.get(url);
-                const statusCode = response.message.statusCode || 0;
-                if (statusCode < 200 || statusCode > 299) {
-                    let body = '';
-                    try {
-                        body = yield response.readBody();
-                    }
-                    catch (err) {
-                        core.debug(`Unable to read body: ${err.message}`);
-                    }
-                    const message = `Unexpected HTTP status code '${response.message.statusCode}' when retrieving versions from '${url}'. ${body}`.trim();
-                    throw new Error(message);
-                }
-                const contents = yield response.readBody();
-                const refs = contents.match(/<a href.*\">/gi) || [];
-                const downloadInfo = getDownloadInfo(refs, version, arch, javaPackage);
-                jdkFile = yield tc.downloadTool(downloadInfo.url);
-                version = downloadInfo.version;
-                compressedFileExtension = IS_WINDOWS ? '.zip' : '.tar.gz';
-            }
-            else {
-                core.debug('Retrieving Jdk from local path');
-            }
-            compressedFileExtension = compressedFileExtension || getFileEnding(jdkFile);
-            let tempDir = path.join(tempDirectory, 'temp_' + Math.floor(Math.random() * 2000000000));
-            const jdkDir = yield unzipJavaDownload(jdkFile, compressedFileExtension, tempDir);
+            yield sdk.execSdkMan('install java ' + version);
+            const jdkDir = userHome + '/.sdkman/candidates/java/' + version;
             core.debug(`jdk extracted to ${jdkDir}`);
-            toolPath = yield tc.cacheDir(jdkDir, javaPackage, getCacheVersionString(version), arch);
+            toolPath = yield tc.cacheDir(jdkDir, 'java-' + version, '1.0.0', arch);
         }
         let extendedJavaHome = 'JAVA_HOME_' + version + '_' + arch;
         core.exportVariable(extendedJavaHome, toolPath); //TODO: remove for v2
@@ -33554,189 +33571,6 @@ function getJava(version, arch, jdkFile, javaPackage) {
     });
 }
 exports.getJava = getJava;
-function getCacheVersionString(version) {
-    const versionArray = version.split('.');
-    const major = versionArray[0];
-    const minor = versionArray.length > 1 ? versionArray[1] : '0';
-    const patch = versionArray.length > 2 ? versionArray[2] : '0';
-    return `${major}.${minor}.${patch}`;
-}
-function getFileEnding(file) {
-    let fileEnding = '';
-    if (file.endsWith('.tar')) {
-        fileEnding = '.tar';
-    }
-    else if (file.endsWith('.tar.gz')) {
-        fileEnding = '.tar.gz';
-    }
-    else if (file.endsWith('.zip')) {
-        fileEnding = '.zip';
-    }
-    else if (file.endsWith('.7z')) {
-        fileEnding = '.7z';
-    }
-    else {
-        throw new Error(`${file} has an unsupported file extension`);
-    }
-    return fileEnding;
-}
-function extractFiles(file, fileEnding, destinationFolder) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const stats = fs.statSync(file);
-        if (!stats) {
-            throw new Error(`Failed to extract ${file} - it doesn't exist`);
-        }
-        else if (stats.isDirectory()) {
-            throw new Error(`Failed to extract ${file} - it is a directory`);
-        }
-        if ('.tar' === fileEnding || '.tar.gz' === fileEnding) {
-            yield tc.extractTar(file, destinationFolder);
-        }
-        else if ('.zip' === fileEnding) {
-            yield tc.extractZip(file, destinationFolder);
-        }
-        else {
-            // fall through and use sevenZip
-            yield tc.extract7z(file, destinationFolder);
-        }
-    });
-}
-// This method recursively finds all .pack files under fsPath and unpacks them with the unpack200 tool
-function unpackJars(fsPath, javaBinPath) {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (fs.existsSync(fsPath)) {
-            if (fs.lstatSync(fsPath).isDirectory()) {
-                for (const file in fs.readdirSync(fsPath)) {
-                    const curPath = path.join(fsPath, file);
-                    yield unpackJars(curPath, javaBinPath);
-                }
-            }
-            else if (path.extname(fsPath).toLowerCase() === '.pack') {
-                // Unpack the pack file synchonously
-                const p = path.parse(fsPath);
-                const toolName = IS_WINDOWS ? 'unpack200.exe' : 'unpack200';
-                const args = IS_WINDOWS ? '-r -v -l ""' : '';
-                const name = path.join(p.dir, p.name);
-                yield exec.exec(`"${path.join(javaBinPath, toolName)}"`, [
-                    `${args} "${name}.pack" "${name}.jar"`
-                ]);
-            }
-        }
-    });
-}
-function unzipJavaDownload(repoRoot, fileEnding, destinationFolder, extension) {
-    return __awaiter(this, void 0, void 0, function* () {
-        // Create the destination folder if it doesn't exist
-        yield io.mkdirP(destinationFolder);
-        const jdkFile = path.normalize(repoRoot);
-        const stats = fs.statSync(jdkFile);
-        if (stats.isFile()) {
-            yield extractFiles(jdkFile, fileEnding, destinationFolder);
-            const jdkDirectory = path.join(destinationFolder, fs.readdirSync(destinationFolder)[0]);
-            yield unpackJars(jdkDirectory, path.join(jdkDirectory, 'bin'));
-            return jdkDirectory;
-        }
-        else {
-            throw new Error(`Jdk argument ${jdkFile} is not a file`);
-        }
-    });
-}
-function getDownloadInfo(refs, version, arch, javaPackage) {
-    version = normalizeVersion(version);
-    const archExtension = arch === 'x86' ? 'i686' : 'x64';
-    let extension = '';
-    if (IS_WINDOWS) {
-        extension = `-win_${archExtension}.zip`;
-    }
-    else {
-        if (process.platform === 'darwin') {
-            extension = `-macosx_${archExtension}.tar.gz`;
-        }
-        else {
-            extension = `-linux_${archExtension}.tar.gz`;
-        }
-    }
-    core.debug(`Searching for files with extension: ${extension}`);
-    let pkgRegexp = new RegExp('');
-    let pkgTypeLength = 0;
-    if (javaPackage === 'jdk') {
-        pkgRegexp = /jdk.*-/gi;
-        pkgTypeLength = 'jdk'.length;
-    }
-    else if (javaPackage == 'jre') {
-        pkgRegexp = /jre.*-/gi;
-        pkgTypeLength = 'jre'.length;
-    }
-    else if (javaPackage == 'jdk+fx') {
-        pkgRegexp = /fx-jdk.*-/gi;
-        pkgTypeLength = 'fx-jdk'.length;
-    }
-    else {
-        throw new Error(`package argument ${javaPackage} is not in [jdk | jre | jdk+fx]`);
-    }
-    // Maps version to url
-    let versionMap = new Map();
-    // Filter by platform
-    refs.forEach(ref => {
-        if (!ref.endsWith(extension + '">')) {
-            return;
-        }
-        // If we haven't returned, means we're looking at the correct platform
-        let versions = ref.match(pkgRegexp) || [];
-        if (versions.length > 1) {
-            throw new Error(`Invalid ref received from https://static.azul.com/zulu/bin/: ${ref}`);
-        }
-        if (versions.length == 0) {
-            return;
-        }
-        const refVersion = versions[0].slice(pkgTypeLength, versions[0].length - 1);
-        if (semver.satisfies(refVersion, version)) {
-            versionMap.set(refVersion, 'https://static.azul.com/zulu/bin/' +
-                ref.slice('<a href="'.length, ref.length - '">'.length));
-        }
-    });
-    // Choose the most recent satisfying version
-    let curVersion = '0.0.0';
-    let curUrl = '';
-    for (const entry of versionMap.entries()) {
-        const entryVersion = entry[0];
-        const entryUrl = entry[1];
-        if (semver.gt(entryVersion, curVersion)) {
-            curUrl = entryUrl;
-            curVersion = entryVersion;
-        }
-    }
-    if (curUrl == '') {
-        throw new Error(`No valid download found for version ${version} and package ${javaPackage}. Check https://static.azul.com/zulu/bin/ for a list of valid versions or download your own jdk file and add the jdkFile argument`);
-    }
-    return { version: curVersion, url: curUrl };
-}
-function normalizeVersion(version) {
-    if (version.slice(0, 2) === '1.') {
-        // Trim leading 1. for versions like 1.8
-        version = version.slice(2);
-        if (!version) {
-            throw new Error('1. is not a valid version');
-        }
-    }
-    if (version.endsWith('-ea')) {
-        // convert e.g. 14-ea to 14.0.0-ea
-        if (version.indexOf('.') == -1) {
-            version = version.slice(0, version.length - 3) + '.0.0-ea';
-        }
-        // match anything in -ea.X (semver won't do .x matching on pre-release versions)
-        if (version[0] >= '0' && version[0] <= '9') {
-            version = '>=' + version;
-        }
-    }
-    else if (version.split('.').length < 3) {
-        // For non-ea versions, add trailing .x if it is missing
-        if (version[version.length - 1] != 'x') {
-            version = version + '.x';
-        }
-    }
-    return version;
-}
 
 
 /***/ }),
