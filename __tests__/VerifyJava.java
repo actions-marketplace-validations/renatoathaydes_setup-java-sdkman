@@ -8,7 +8,7 @@ public class VerifyJava {
         
         assertEqual(System.getProperty("java.version"), expectedJavaVersion, "Unexpected version");
         assertEqual(System.getProperty("java.vendor"), expectedVendor, "Unexpected vendor");
-        assertEqual(System.getProperty("java.home"), expectedJavaVersion, "Unexpected java.home");
+        assertEqual(System.getProperty("java.home"), expectedJavaHome, "Unexpected java.home");
         assertEqual(expectedJavaVersion, javaVersionOutput, "Unexpected output version");
     }
 
