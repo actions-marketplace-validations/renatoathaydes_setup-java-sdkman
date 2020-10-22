@@ -40,8 +40,4 @@ jobs:
       with:
         java-version: 8.0.265-zulu
     - name: Verify Java 8
-      if: runner.os != 'windows'
-      run: __tests__/verify-java.sh 1.8.0_265 "${{ steps.setup-java-sdkman.outputs.path }}" "${{ steps.setup-java-sdkman.outputs.version }}"
-    - name: Verify Java 8 (Windows)
-      if: runner.os == 'windows'
-      run: __tests__/verify-java.ps1 1.8.0_265 "${{ steps.setup-java-sdkman.outputs.path }}" "${{ steps.setup-java-sdkman.outputs.version }}"
+      run: cd __tests__ && javac VerifyJava.java && java VerifyJava 1.8.0_265 "Azul Systems, Inc." "${{ steps.setup-java-sdkman.outputs.path }}" "${{ steps.setup-java-sdkman.outputs.version }}"
