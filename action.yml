@@ -2,6 +2,9 @@ name: 'Setup Java JDK with SDKMAN!'
 description: 'Set up a specific Java JDK using SDKMAN! and add the
    command-line tools to the PATH'
 author: 'Renato Athaydes'
+branding:
+  color: blue
+  icon: play-circle
 inputs:
   java-version:
     description: 'The Java version to make available on the path. Must match a SDKMAN! 
