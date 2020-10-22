@@ -7,6 +7,7 @@ fi
 
 java_version="$(java -version 2>&1)"
 echo "Found java version: $java_version"
+echo "Grepping for '$1'"
 if [ -z "$(echo $java_version | grep "$1")" ]; then
   echo "::error::Unexpected version"
   exit 1
