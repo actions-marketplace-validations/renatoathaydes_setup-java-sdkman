@@ -40,4 +40,8 @@ jobs:
       with:
         java-version: 8.0.265-zulu
     - name: Verify Java 8
-      run: cd __tests__ && javac VerifyJava.java && java VerifyJava 1.8.0_265 "Azul Systems, Inc." "${{ steps.setup-java-sdkman.outputs.path }}" "${{ steps.setup-java-sdkman.outputs.version }}"
+      run: >
+        cd __tests__ && javac VerifyJava.java &&
+        java VerifyJava 1.8.0_265 "Azul Systems, Inc."
+        "${{ steps.setup-java-sdkman.outputs.path }}" "${{ steps.setup-java-sdkman.outputs.version }}"
+        8.0.265-zulu
