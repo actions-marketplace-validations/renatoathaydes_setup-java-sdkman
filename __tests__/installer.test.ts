@@ -77,5 +77,4 @@ describe('installer tests', () => {
     await installer.getJava('250', 'x64');
     return;
   });
-
 });
