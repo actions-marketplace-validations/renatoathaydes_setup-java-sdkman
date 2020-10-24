@@ -46,7 +46,7 @@ jobs:
         "${{ steps.setup-java8.outputs.path }}" "${{ steps.setup-java8.outputs.version }}"
         8.0.272-zulu
     - name: Verify sdk command reports Java 8
-      run: __tests__/verify-java.sh "$(${{ steps.setup-java8.outputs.sdkCommand }} which java)" 8.0.272-zulu
+      run: __tests__/verify-java.sh "$(${{ steps.setup-java8.outputs.sdkCommand }} current java)" 8.0.272-zulu
     - name: Setup Java 11 OpenJDK
       id: setup-java11
       uses: ./
@@ -59,4 +59,4 @@ jobs:
         "${{ steps.setup-java11.outputs.path }}" "${{ steps.setup-java11.outputs.version }}"
         11.0.2-open
     - name: Verify sdk command reports Java 11
-      run: __tests__/verify-java.sh "$(${{ steps.setup-java11.outputs.sdkCommand }} which java)" 11.0.2-open
+      run: __tests__/verify-java.sh "$(${{ steps.setup-java11.outputs.sdkCommand }} current java)" 11.0.2-open
