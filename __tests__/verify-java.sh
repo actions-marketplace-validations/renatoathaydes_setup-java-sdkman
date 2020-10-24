@@ -1,4 +1,6 @@
-#!/bin/sh
+#!/bin/bash
+
+set -e
 
 EXPECTED_OUTPUT="
 Using java version $2"
