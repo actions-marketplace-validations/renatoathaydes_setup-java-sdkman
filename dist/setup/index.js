@@ -8026,15 +8026,22 @@ var __importStar = (this && this.__importStar) || function (mod) {
     result["default"] = mod;
     return result;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(__webpack_require__(470));
 const exec = __importStar(__webpack_require__(986));
+const io = __importStar(__webpack_require__(1));
 const tc = __importStar(__webpack_require__(533));
+const fs_1 = __importDefault(__webpack_require__(747));
+const path_1 = __importDefault(__webpack_require__(622));
 const sdkmanUrl = 'https://get.sdkman.io';
 const userHome = process.env.HOME;
 const shell = (process.env.SHELL || 'bash');
 function getSdkMan() {
     return __awaiter(this, void 0, void 0, function* () {
+        let sdkHome = path_1.default.join(userHome, '.sdkman');
         let toolPath = tc.find('sdkman', '1');
         if (toolPath) {
             core.debug(`SDKMAN! found in cache ${toolPath}`);
@@ -8043,12 +8050,26 @@ function getSdkMan() {
             core.debug('Installing SDKMAN!');
             const sdkmanInstaller = yield tc.downloadTool(sdkmanUrl);
             yield exec.exec(shell, [sdkmanInstaller]);
-            yield tc.cacheDir(`${userHome}/.sdkman`, 'sdkman', '1.0.0');
+            yield tc.cacheDir(sdkHome, 'sdkman', '1.0.0');
             core.info('Installed SDKMAN!');
         }
+        yield saveSdkManConfig(sdkHome);
     });
 }
 exports.getSdkMan = getSdkMan;
+function saveSdkManConfig(sdkHome) {
+    return __awaiter(this, void 0, void 0, function* () {
+        core.debug('Creating SDKMAN! config file');
+        let configDir = path_1.default.join(sdkHome, 'etc');
+        yield io.mkdirP(configDir);
+        let configFile = path_1.default.join(configDir, 'config');
+        fs_1.default.writeFileSync(configFile, 'sdkman_auto_answer=true', {
+            encoding: 'utf-8',
+            flag: 'w'
+        });
+        core.debug(`Saved SDKMAN! config file: ${configFile}`);
+    });
+}
 function execSdkMan(args) {
     return __awaiter(this, void 0, void 0, function* () {
         yield getSdkMan();
