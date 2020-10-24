@@ -6,9 +6,18 @@
 
 This action sets up a java environment for use in actions by:
 
-- Downloading and caching a requested version of java by its SDKMAN! version and adding to PATH.
+- Downloading and installing [SDKMAN!](https://sdkman.io)
+- Running `sdk install java <java-version>`, which adds Java to the `PATH`, sets `JAVA_HOME` etc.
   See [SDKMAN!](http://sdkman.io/jdks) for available JDK versions.
 - registering problem matchers for error output
+
+As this action installs SDKMAN!, after it runs, you can run any SDKMAN! command to, for example,
+install [other SDKs](https://sdkman.io/sdks), including Gradle/Maven/SpringBoot etc.
+
+See this project's own
+[workflow.yml](.github/workflows/workflow.yml) for an example in step `Verify sdk command reports Java 11`.
+
+[Latest Version](https://github.com/renatoathaydes/setup-java-sdkman/releases)
 
 # Usage
 
@@ -19,7 +28,7 @@ See [action.yml](action.yml)
 ```yaml
 steps:
 - uses: actions/checkout@v2
-- uses: renatoathaydes/setup-java-sdkman@v1
+- uses: renatoathaydes/setup-java-sdkman@v2.x
   with:
     java-version: '11.0.2-open' # The SDKMAN! JDK version to use.
     architecture: x64 # (x64 or x86) - defaults to x64
@@ -39,7 +48,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Setup java
-        uses: renatoathaydes/setup-java-sdkman@v1
+        uses: renatoathaydes/setup-java-sdkman@v2.x
         with:
           java-version: ${{ matrix.java }}
       - run: java -cp java HelloWorldApp
@@ -56,7 +65,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Set up JDK 1.8
-      uses: renatoathaydes/setup-java-sdkman@v1
+      uses: renatoathaydes/setup-java-sdkman@v2.x
       with:
         java-version: "8.0.265-zulu"
 
@@ -69,7 +78,7 @@ jobs:
         GITHUB_TOKEN: ${{ github.token }} # GITHUB_TOKEN is the default env for the password
 
     - name: Set up Apache Maven Central
-      uses: renatoathaydes/setup-java-sdkman@v1
+      uses: renatoathaydes/setup-java-sdkman@v2.x
       with: # running setup-java again overwrites the settings.xml
         java-version: 8.0.265-zulu
         server-id: maven # Value of the distributionManagement/repository/id field of the pom.xml
@@ -145,7 +154,7 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Set up JDK 1.8
-      uses: renatoathaydes/setup-java-sdkman@v1
+      uses: renatoathaydes/setup-java-sdkman@v2.x
       with:
         java-version: "8.0.265-zulu"
 
@@ -176,7 +185,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Set up JDK 1.8 for Shared Runner
-      uses: renatoathaydes/setup-java-sdkman@v1
+      uses: renatoathaydes/setup-java-sdkman@v2.x
       with:
         java-version: "8.0.265-zulu"
         server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
