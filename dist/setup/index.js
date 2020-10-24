@@ -8053,6 +8053,7 @@ function getSdkMan() {
             yield tc.cacheDir(sdkHome, 'sdkman', '1.0.0');
             core.info('Installed SDKMAN!');
         }
+        core.setOutput('sdkCommand', sdkManCmdPrefix());
         yield saveSdkManConfig(sdkHome);
     });
 }
@@ -8073,16 +8074,16 @@ function saveSdkManConfig(sdkHome) {
 function execSdkMan(args) {
     return __awaiter(this, void 0, void 0, function* () {
         yield getSdkMan();
-        let code = yield exec.exec(shell, [
-            '-c',
-            `source ${userHome}/.sdkman/bin/sdkman-init.sh && sdk ${args}`
-        ]);
+        let code = yield exec.exec(shell, ['-c', `${sdkManCmdPrefix()} ${args}`]);
         if (code !== 0) {
             throw `sdk ERROR: command 'sdk ${args}' exited with code ${code}`;
         }
     });
 }
 exports.execSdkMan = execSdkMan;
+function sdkManCmdPrefix() {
+    return `source ${path_1.default.join(userHome, '.sdkman', 'bin', 'sdkman-init.sh')} && sdk `;
+}
 
 
 /***/ }),

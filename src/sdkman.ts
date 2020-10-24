@@ -22,6 +22,7 @@ export async function getSdkMan(): Promise<void> {
     await tc.cacheDir(sdkHome, 'sdkman', '1.0.0');
     core.info('Installed SDKMAN!');
   }
+  core.setOutput('sdkCommand', sdkManCmdPrefix());
   await saveSdkManConfig(sdkHome);
 }
 
@@ -39,11 +40,17 @@ async function saveSdkManConfig(sdkHome: string): Promise<void> {
 
 export async function execSdkMan(args: string): Promise<void> {
   await getSdkMan();
-  let code = await exec.exec(shell, [
-    '-c',
-    `source ${userHome}/.sdkman/bin/sdkman-init.sh && sdk ${args}`
-  ]);
+  let code = await exec.exec(shell, ['-c', `${sdkManCmdPrefix()} ${args}`]);
   if (code !== 0) {
     throw `sdk ERROR: command 'sdk ${args}' exited with code ${code}`;
   }
+}
+
+function sdkManCmdPrefix() {
+  return `source ${path.join(
+    userHome,
+    '.sdkman',
+    'bin',
+    'sdkman-init.sh'
+  )} && sdk `;
 }

@@ -35,7 +35,7 @@ jobs:
       if: runner.os == 'windows'
       run: move "${{ runner.tool_cache }}" "${{ runner.tool_cache }}.old"
     - name: Setup Java 8 Zulu
-      id: setup-java-sdkman
+      id: setup-java8
       uses: ./
       with:
         java-version: 8.0.272-zulu
@@ -43,5 +43,20 @@ jobs:
       run: >
         cd __tests__ && javac VerifyJava.java &&
         java VerifyJava 1.8.0_272 "Azul Systems, Inc."
-        "${{ steps.setup-java-sdkman.outputs.path }}" "${{ steps.setup-java-sdkman.outputs.version }}"
+        "${{ steps.setup-java8.outputs.path }}" "${{ steps.setup-java8.outputs.version }}"
         8.0.272-zulu
+    - name: Verify sdk command reports Java 8
+      run: __tests__/verify-java.sh "$(${{ steps.setup-java8.outputs.sdkCommand }} which java)" 8.0.272-zulu
+    - name: Setup Java 11 OpenJDK
+      id: setup-java11
+      uses: ./
+      with:
+        java-version: 11.0.2-open
+    - name: Verify Java 11
+      run: >
+        cd __tests__ && javac VerifyJava.java &&
+        java VerifyJava 11.0.2 "Oracle Corporation"
+        "${{ steps.setup-java11.outputs.path }}" "${{ steps.setup-java11.outputs.version }}"
+        11.0.2-open
+    - name: Verify sdk command reports Java 11
+      run: __tests__/verify-java.sh "$(${{ steps.setup-java11.outputs.sdkCommand }} which java)" 11.0.2-open
